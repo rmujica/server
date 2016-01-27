@@ -8,7 +8,7 @@ CREATE TABLE "groups" (
 	"maxviplist" INT NOT NULL,
 	PRIMARY KEY ("id")
 );
-INSERT INTO "groups" VALUES (1, 'Player', 0, 0, 0, 2000, 100),(2, 'Tutor', 16777216, 0, 0, 2000, 100),(3, 'Sennior Tutor', 274894684160, 0, 0, 2000, 100),(4, 'Community Manager', 69681547968463, 2, 0, 1000, 100),(5, 'Game Master', 69681547968463, 2, 0, 1000, 100),(6, 'GOD/OWNER', 57171953819640, 3, 0, 2000, 100);
+INSERT INTO "groups" VALUES (1, 'Player', 0, 0, 0, 2000, 100),(2, 'Tutor', 16777216, 0, 0, 2000, 100),(3, 'Senior Tutor', 274894684160, 0, 0, 2000, 100),(4, 'Community Manager', 69681547968463, 2, 0, 1000, 100),(5, 'Gamemaster', 69681547968463, 2, 0, 1000, 100),(6, 'God', 57171953819640, 3, 0, 2000, 100);
 
 CREATE TABLE "accounts" (
 	"id" SERIAL,
@@ -61,7 +61,7 @@ CREATE TABLE "players" (
 	"loss_mana" INT NOT NULL DEFAULT 100,
 	"loss_skills" INT NOT NULL DEFAULT 100,
 	"loss_items" INT NOT NULL DEFAULT 10,
-	"loss_containers" INT NOT NULL DEFAULT 100
+	"loss_containers" INT NOT NULL DEFAULT 100,
 	"town_id" INT NOT NULL,
 	"balance" INT NOT NULL DEFAULT 0,
 	"stamina" INT NOT NULL DEFAULT 151200000,
@@ -70,10 +70,11 @@ CREATE TABLE "players" (
 	"guildnick" VARCHAR(255) NOT NULL,
 	PRIMARY KEY ("id"),
 	UNIQUE ("name"),
-	KEY ("online"),
 	FOREIGN KEY ("account_id") REFERENCES "accounts" ("id") ON DELETE CASCADE,
 	FOREIGN KEY ("group_id") REFERENCES "groups" ("id")
 );
+
+CREATE INDEX online_players_index ON players USING HASH (online);
 
 CREATE TABLE "guilds" (
 	"id" SERIAL,
@@ -97,7 +98,7 @@ CREATE TABLE "guild_ranks" (
 CREATE TABLE "guild_members" (
 	"player_id" INT NOT NULL,
 	"rank_id" INT NOT NULL,
-	"guild_nick" VARCHAR(255) NOT NULL DEFAULT '',
+	"nick" VARCHAR(255) NOT NULL DEFAULT '',
 	UNIQUE ("player_id"),
 	FOREIGN KEY ("player_id") REFERENCES "players" ("id") ON DELETE CASCADE,
 	FOREIGN KEY ("rank_id") REFERENCES "guild_ranks" ("id") ON DELETE CASCADE
@@ -208,6 +209,7 @@ CREATE TABLE "house_lists" (
 CREATE TABLE "bans" (
 	"id" SERIAL,
 	"type" BIGINT NOT NULL,
+	"value" SMALLINT NOT NULL,
 	"param" BIGINT NOT NULL,
 	"active" SMALLINT DEFAULT 0,
 	"expires" BIGINT NOT NULL,
@@ -242,9 +244,10 @@ CREATE TABLE "tile_items" (
 
 CREATE TABLE "map_store" (
 	"house_id" INT NOT NULL,
-	"data" BYTEA NOT NULL,
-	KEY("house_id")
+	"data" BYTEA NOT NULL
 );
+
+CREATE INDEX house_id_map_store_index ON map_store USING HASH(house_id);
 
 CREATE TABLE "player_deaths" (
 	"id" SERIAL,
